@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Memory Lane — Our Almost Forever</title>
+  <style>
+    :root{--bg1:#0b1020;--bg2:#2b1055;--text:#f7f7fb;--muted:#c9c9d6;--shadow:0 18px 60px rgba(0,0,0,.35);--radius:18px;}
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;color:var(--text);
+      background:radial-gradient(1200px 900px at 15% 10%, #4c1d95 0%, transparent 55%),
+              radial-gradient(900px 700px at 80% 25%, #ff3d7f 0%, transparent 55%),
+              radial-gradient(900px 700px at 40% 90%, #00c2ff 0%, transparent 55%),
+              linear-gradient(160deg,var(--bg1),var(--bg2));
+      min-height:100vh;-webkit-tap-highlight-color:transparent;}
+    .wrap{max-width:920px;margin:0 auto;padding:18px 14px 42px;}
+    header{position:sticky;top:0;z-index:10;backdrop-filter:blur(14px);
+      background:linear-gradient(180deg,rgba(0,0,0,.35),rgba(0,0,0,0));padding:10px 0 12px;}
+    h1{margin:0;font-size:22px;}
+    .sub{margin-top:6px;color:var(--muted);font-size:13px;line-height:1.45;}
+    .btns{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px;}
+    button{border:none;padding:11px 12px;border-radius:14px;cursor:pointer;color:var(--text);
+      background:rgba(255,255,255,.10);box-shadow:0 8px 22px rgba(0,0,0,.18);font-size:13px;}
+    button.primary{background:linear-gradient(135deg,rgba(255,209,102,.35),rgba(77,214,255,.22));
+      border:1px solid rgba(255,255,255,.18);}
+    .hero{margin-top:14px;border-radius:var(--radius);background:linear-gradient(135deg,rgba(255,255,255,.10),rgba(255,255,255,.06));
+      border:1px solid rgba(255,255,255,.12);box-shadow:var(--shadow);padding:16px;}
+    .hero p{margin:0;color:var(--muted);font-size:14px;line-height:1.55;}
+    .hero .big{margin-top:10px;color:var(--text);font-size:15px;line-height:1.65;}
+    .timeline{margin-top:16px;display:grid;gap:12px;}
+    .card{border-radius:var(--radius);background:linear-gradient(180deg,rgba(255,255,255,.10),rgba(255,255,255,.06));
+      border:1px solid rgba(255,255,255,.12);box-shadow:var(--shadow);padding:14px;position:relative;}
+    .card:active{transform:translateY(1px);}
+    .meta{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap;}
+    .date{font-weight:800;font-size:16px;}
+    .prompt{margin-top:6px;color:var(--muted);font-size:13px;}
+    .pill{display:inline-flex;align-items:center;padding:7px 10px;border-radius:999px;background:rgba(0,0,0,.18);
+      border:1px solid rgba(255,255,255,.10);color:var(--muted);font-size:12px;}
+    .reveal{display:none;margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,.12);}
+    .reveal p{margin:0 0 10px;line-height:1.6;}
+    .tag{color:#ffd166;font-weight:800;}
+    .kv{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.10);border-radius:14px;padding:10px 12px;margin-top:10px;}
+    .k{color:var(--muted);font-size:12px;margin-bottom:4px;}
+    .v{color:var(--text);font-size:14px;}
+    .hint{margin-top:10px;color:rgba(255,255,255,.7);font-size:12px;}
+    .footer{margin-top:22px;color:rgba(255,255,255,.65);font-size:12px;text-align:center;}
+    .sparkle{position:fixed;inset:0;pointer-events:none;opacity:.25;background-image:
+      radial-gradient(circle at 20% 30%, rgba(255,255,255,.8) 0 1px, transparent 2px),
+      radial-gradient(circle at 70% 55%, rgba(255,255,255,.7) 0 1px, transparent 2px),
+      radial-gradient(circle at 40% 80%, rgba(255,255,255,.6) 0 1px, transparent 2px),
+      radial-gradient(circle at 85% 20%, rgba(255,255,255,.6) 0 1px, transparent 2px);
+      background-size:300px 300px;animation:drift 14s linear infinite;}
+    @keyframes drift{from{transform:translate3d(0,0,0)}to{transform:translate3d(-120px,80px,0)}}
+  </style>
+</head>
+<body>
+  <div class="sparkle"></div>
+
+  <header>
+    <div class="wrap">
+      <h1>Memory Lane</h1>
+      <div class="sub">Tap a moment card to open it. Tap again to close. Edit details and save them on your phone.</div>
+      <div class="btns">
+        <button class="primary" id="openAllBtn">Open all</button>
+        <button id="closeAllBtn">Close all</button>
+        <button id="saveBtn">Save on this phone</button>
+        <button id="loadBtn">Load saved</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="hero">
+      <p>Some memories don’t fade — they just change shape.</p>
+      <p class="big">This is a private timeline. No internet needed. Just tap a card. Edit what she wore and the tiny detail you remember to make it yours.</p>
+      <div class="hint">If tapping doesn’t work: open the file in a browser (Chrome/Safari), not inside a file preview app.</div>
+    </section>
+
+    <section class="timeline" id="timeline"></section>
+
+    <div class="footer">Built as a soft archive — not for the internet, just for the heart.</div>
+  </main>
+
+  <script>
+    let moments = [
+      { id: 1, title: "The day we met", dateISO: "2022-11-06", tag: "Chapter One",
+        outfit: "Tap ‘Edit’ to add what she was wearing…",
+        place: "Tap ‘Edit’ to add where you met…",
+        note: "Tap ‘Edit’ to add the detail you never forget…" },
+      { id: 2, title: "First hang out", dateISO: "2022-12-07", tag: "The Spark",
+        outfit: "Tap ‘Edit’ to add what she was wearing…",
+        place: "Tap ‘Edit’ to add where you hung out…",
+        note: "Tap ‘Edit’ to add the detail you never forget…" },
+      { id: 3, title: "First date", dateISO: "2023-04-04", tag: "The Yes",
+        outfit: "Tap ‘Edit’ to add what she was wearing…",
+        place: "Tap ‘Edit’ to add where it happened…",
+        note: "Tap ‘Edit’ to add the detail you never forget…" },
+      { id: 4, title: "First “I love you”", dateISO: "2024-12-12", tag: "The Truth",
+        outfit: "Tap ‘Edit’ to add what she was wearing…",
+        place: "Tap ‘Edit’ to add where it happened…",
+        note: "Tap ‘Edit’ to add the detail you never forget…" }
+    ];
+
+    const fmt = (iso) => new Date(iso + "T00:00:00").toLocaleDateString(undefined, {year:"numeric",month:"long",day:"numeric"});
+    const esc = (s) => String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
+
+    function getReveal(id){ return document.getElementById("reveal-" + id); }
+
+    function render(){
+      const box = document.getElementById("timeline");
+      box.innerHTML = moments.map(m => `
+        <article class="card" data-id="${m.id}">
+          <div class="meta">
+            <div>
+              <div class="date">${fmt(m.dateISO)} — ${esc(m.title)}</div>
+              <div class="prompt">${esc(m.tag)} • Tap this card to open.</div>
+            </div>
+            <span class="pill">Moment #${m.id}</span>
+          </div>
+
+          <div class="btns" style="margin-top:10px;">
+            <button class="primary" data-action="toggle" data-id="${m.id}">Open / Close</button>
+            <button data-action="edit" data-id="${m.id}">Edit</button>
+          </div>
+
+          <div class="reveal" id="reveal-${m.id}">
+            <p><span class="tag">A small detail:</span> ${esc(m.note)}</p>
+
+            <div class="kv">
+              <div class="k">What she wore</div>
+              <div class="v">${esc(m.outfit)}</div>
+            </div>
+
+            <div class="kv">
+              <div class="k">Where it happened</div>
+              <div class="v">${esc(m.place)}</div>
+            </div>
+          </div>
+        </article>
+      `).join("");
+    }
+
+    function toggle(id){
+      const el = getReveal(id);
+      if(!el) return;
+      el.style.display = (el.style.display === "block") ? "none" : "block";
+    }
+    function openAll(){ moments.forEach(m => { const el=getReveal(m.id); if(el) el.style.display="block"; }); }
+    function closeAll(){ moments.forEach(m => { const el=getReveal(m.id); if(el) el.style.display="none"; }); }
+
+    function edit(id){
+      const m = moments.find(x => x.id === id);
+      if(!m) return;
+
+      const outfit = prompt("What was she wearing? (be as specific as you want)", m.outfit || "");
+      if(outfit !== null) m.outfit = outfit;
+
+      const place = prompt("Where did it happen?", m.place || "");
+      if(place !== null) m.place = place;
+
+      const note = prompt("One detail you never forget (a sentence or two)", m.note || "");
+      if(note !== null) m.note = note;
+
+      render();
+      const el = getReveal(id);
+      if(el) el.style.display = "block";
+      const card = document.querySelector(`.card[data-id="${id}"]`);
+      if(card) card.scrollIntoView({behavior:"smooth", block:"start"});
+    }
+
+    function save(){
+      localStorage.setItem("memoryLaneMoments_v2", JSON.stringify(moments));
+      alert("Saved on this phone.");
+    }
+    function load(){
+      const raw = localStorage.getItem("memoryLaneMoments_v2");
+      if(!raw){ alert("No saved version found on this phone."); return; }
+      try{
+        const loaded = JSON.parse(raw);
+        if(Array.isArray(loaded) && loaded.length) moments = loaded;
+        render();
+        alert("Loaded your saved version.");
+      }catch(e){
+        alert("Saved data looks corrupted.");
+      }
+    }
+
+    // Mobile-safe event delegation
+    document.addEventListener("click", (e) => {
+      const btn = e.target.closest("button");
+      if(btn){
+        const action = btn.dataset.action;
+        const id = Number(btn.dataset.id);
+        if(action === "toggle") toggle(id);
+        if(action === "edit") edit(id);
+        return;
+      }
+      const card = e.target.closest(".card");
+      if(card){
+        const id = Number(card.dataset.id);
+        toggle(id);
+      }
+    });
+
+    document.getElementById("openAllBtn").addEventListener("click", openAll);
+    document.getElementById("closeAllBtn").addEventListener("click", closeAll);
+    document.getElementById("saveBtn").addEventListener("click", save);
+    document.getElementById("loadBtn").addEventListener("click", load);
+
+    render();
+  </script>
+</body>
+</html>
